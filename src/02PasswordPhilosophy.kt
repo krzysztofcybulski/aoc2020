@@ -11,6 +11,16 @@ data class PasswordPolicy(
 
 }
 
+data class PasswordPolicy2(
+    val position1: Int,
+    val position2: Int,
+    val letter: Char
+) {
+
+    fun isValid(password: String): Boolean = (password[position1 - 1] == letter).xor(password[position2 - 1] == letter)
+
+}
+
 fun main(args: Array<String>) {
     val lines = object {}.javaClass.getResource("02PasswordPhilosophy.txt")
         .readText()
@@ -23,7 +33,7 @@ fun main(args: Array<String>) {
         .map { pattern.matcher(it) }
         .count {
             it.matches()
-            PasswordPolicy(
+            PasswordPolicy2(
                 it.group(1).toInt(),
                 it.group(2).toInt(),
                 it.group(3).elementAt(0)
