@@ -3,13 +3,16 @@ class TobogganTrajectory {
 
 class Mountain(private val pattern: List<List<Boolean>>) {
 
-    fun height() = pattern.size
+    fun treesOnSlope(slope: Int, speed: Int = 1) = (0 until height / speed)
+        .count { isTreeOn(it * speed, it * slope) }
 
-    fun isTreeOn(down: Int, right: Int) = pattern[down][right % pattern[0].size]
+    private val height = pattern.size
+
+    private fun isTreeOn(down: Int, right: Int) = pattern[down][right % pattern[0].size]
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
     val lines = object {}.javaClass.getResource("03TobogganTrajectory.txt")
         .readText()
         .split("\n")
@@ -17,5 +20,13 @@ fun main(args: Array<String>) {
 
     val mountain = Mountain(lines.map { it.map { it == '#' } })
 
-    println((0 until mountain.height()).count { mountain.isTreeOn(it, it * 3) })
+    val result = listOf(
+        mountain.treesOnSlope(1),
+        mountain.treesOnSlope(3),
+        mountain.treesOnSlope(5),
+        mountain.treesOnSlope(7),
+        mountain.treesOnSlope(1, 2)
+    ).reduce { acc, i ->  acc * i }
+
+    println(result)
 }
