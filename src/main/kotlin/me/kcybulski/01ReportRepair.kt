@@ -1,3 +1,5 @@
+package me.kcybulski
+
 class ReportRepair(expenses: Collection<Int>) {
 
     private val expenses = HashSet(expenses)

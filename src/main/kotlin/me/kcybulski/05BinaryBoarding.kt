@@ -1,3 +1,5 @@
+package me.kcybulski
+
 class Plane(private val takenSeats: Collection<Seat>) {
 
     fun findEmptySeats() = (takenSeats.minOf { it.id }..takenSeats.maxOf { it.id }) - takenSeats.map { it.id }
@@ -27,11 +29,6 @@ class Seat(row: Int, column: Int) {
 }
 
 fun main() {
-    val lines = object {}.javaClass.getResource("05BinaryBoarding.txt")
-        .readText()
-        .split("\n")
-        .filter { it.isNotBlank() }
-
-    val plane = Plane(lines.map { Seat.from(it) })
+    val plane = Plane(lines("05BinaryBoarding").map { Seat.from(it) })
     println(plane.findEmptySeats())
 }

@@ -1,5 +1,4 @@
-class TobogganTrajectory {
-}
+package me.kcybulski
 
 class Mountain(private val pattern: List<List<Boolean>>) {
 
@@ -13,12 +12,7 @@ class Mountain(private val pattern: List<List<Boolean>>) {
 }
 
 fun main() {
-    val lines = object {}.javaClass.getResource("03TobogganTrajectory.txt")
-        .readText()
-        .split("\n")
-        .filter { it.isNotBlank() }
-
-    val mountain = Mountain(lines.map { it.map { it == '#' } })
+    val mountain = Mountain(lines("03TobogganTrajectory").map { it.map { it == '#' } })
 
     val result = listOf(
         mountain.treesOnSlope(1),

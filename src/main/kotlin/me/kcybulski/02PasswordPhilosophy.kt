@@ -1,5 +1,4 @@
-class PasswordPhilosophy() {
-}
+package me.kcybulski
 
 data class PasswordPolicy(
     val min: Int,
@@ -21,15 +20,10 @@ data class PasswordPolicy2(
 
 }
 
-fun main(args: Array<String>) {
-    val lines = object {}.javaClass.getResource("02PasswordPhilosophy.txt")
-        .readText()
-        .split("\n")
-        .filter { it.isNotBlank() }
-
+fun main() {
     val pattern = "^(\\d+)-(\\d+) ([a-z]): ([a-z]+)\$".toPattern()
 
-    val validPasswords = lines
+    val validPasswords = lines("02PasswordPhilosophy")
         .map { pattern.matcher(it) }
         .count {
             it.matches()
