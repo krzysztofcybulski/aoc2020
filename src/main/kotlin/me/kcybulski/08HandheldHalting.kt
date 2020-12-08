@@ -3,17 +3,26 @@ package me.kcybulski
 fun main() {
     val ops = lines("08HandheldHalting").map { parse(it) }
 
-    val ctx = Context(program = ops)
-    println(run(ctx))
+    (ops.indices)
+        .map { ops.updated(it, changeOp(ops[it])) }
+        .map { Context(program = it) }
+        .mapNotNull { run(it) }
+        .forEach { println(it) }
 }
 
-fun run(ctx: Context): Int {
+fun run(ctx: Context): Int? {
     val op = ctx.getInstruction()
     return when {
         op == null -> ctx.acc
-        ctx.visited.contains(op) -> ctx.acc
+        ctx.visited.contains(op) -> null
         else -> run(op.next(ctx.copy(visited = ctx.visited + op)))
     }
+}
+
+fun changeOp(op: Instruction): Instruction = when(op) {
+    is Nothing -> Jump(op.arg)
+    is Jump -> Nothing(op.arg)
+    else -> op
 }
 
 private fun parse(line: String): Instruction {
@@ -56,3 +65,5 @@ data class Context(
     fun getInstruction() = program.getOrNull(pointer)
 
 }
+
+fun <E> Iterable<E>.updated(index: Int, elem: E) = mapIndexed { i, existing ->  if (i == index) elem else existing }
