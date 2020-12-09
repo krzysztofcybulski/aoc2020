@@ -1,16 +1,27 @@
 package me.kcybulski
 
 fun main() {
-    val lines = lines("09EncodingError").map { it.toLong() }
-    val preamble = 25
+    val nums = lines("09EncodingError").map { it.toLong() }
+    val sum = 1212510616L
 
-    lines
-        .drop(preamble)
-        .mapIndexed { i, x -> isPairOf(x, lines.drop(i).take(preamble)) }
-        .indexOf(false)
-        .let { println(lines[it + preamble]) }
+    var index = 0
+    var length = 1
+
+    while(true) {
+        val s = nums.subList(index, index + length).sum()
+        when {
+            s > sum -> {
+                index++
+                length = 1
+            }
+            s < sum -> {
+                length++
+            }
+            else -> {
+                val res = nums.subList(index, index + length)
+                println((res.minOrNull() ?: 0) + (res.maxOrNull() ?: 0))
+                return
+            }
+        }
+    }
 }
-
-fun isPairOf(x: Long, nums: List<Long>): Boolean = nums
-    .map { x - it }
-    .find { nums.contains(it) } != null
