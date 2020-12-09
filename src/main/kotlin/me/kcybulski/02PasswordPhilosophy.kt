@@ -1,5 +1,6 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
 import java.util.regex.Matcher
 
 interface PasswordPolicy {

@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 fun main() {
     val nums = lines("09EncodingError").map { it.toLong() }
     val sum = 1212510616L

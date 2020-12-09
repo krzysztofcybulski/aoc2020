@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 fun main() {
     val ops = lines("08HandheldHalting").map { parse(it) }
 

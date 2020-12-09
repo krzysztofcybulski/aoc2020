@@ -1,4 +1,4 @@
-package me.kcybulski
+package me.kcybulski.utils
 
 class Data
 

@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 class Mountain(private val pattern: List<List<Boolean>>) {
 
     fun treesOnSlope(slope: Int, speed: Int = 1) = (0 until height / speed)

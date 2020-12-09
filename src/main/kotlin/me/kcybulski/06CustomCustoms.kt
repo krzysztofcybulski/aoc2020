@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 class GroupAnswers(private val personAnswers: List<PersonAnswers>) {
 
     fun questionsOr() = personAnswers

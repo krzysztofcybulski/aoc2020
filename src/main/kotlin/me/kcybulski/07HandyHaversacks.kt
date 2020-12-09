@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 data class Bag(val name: String, val innerBags: Collection<Pair<Int, Bag>>) {
 
     fun contains(color: String): Boolean = when(name) {

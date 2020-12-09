@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 data class Passport(
     val byr: String?,
     val iyr: String?,

@@ -1,5 +1,7 @@
 package me.kcybulski
 
+import me.kcybulski.utils.lines
+
 class Plane(private val takenSeats: Collection<Seat>) {
 
     fun findEmptySeats() = (takenSeats.minOf { it.id }..takenSeats.maxOf { it.id }) - takenSeats.map { it.id }
