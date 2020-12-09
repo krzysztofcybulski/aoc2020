@@ -8,7 +8,6 @@ class Mountain(private val pattern: List<List<Boolean>>) {
     private val height = pattern.size
 
     private fun isTreeOn(down: Int, right: Int) = pattern[down][right % pattern[0].size]
-
 }
 
 fun main() {

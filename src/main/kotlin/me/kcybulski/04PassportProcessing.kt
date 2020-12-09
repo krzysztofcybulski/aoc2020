@@ -17,8 +17,7 @@ data class Passport(
                     hgt == null ||
                     hcl == null ||
                     ecl == null ||
-                    pid == null)
-        ) {
+                    pid == null)) {
             return false
         }
 
@@ -80,7 +79,7 @@ data class Passport(
 
     }
 
-    fun isNumber(s: String, length: Int): Boolean {
+    private fun isNumber(s: String, length: Int): Boolean {
         val x = s.count { it.isDigit() }
         return s.length == length && x == length
     }

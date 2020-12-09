@@ -3,7 +3,6 @@ package me.kcybulski
 class Plane(private val takenSeats: Collection<Seat>) {
 
     fun findEmptySeats() = (takenSeats.minOf { it.id }..takenSeats.maxOf { it.id }) - takenSeats.map { it.id }
-
 }
 
 class Seat(row: Int, column: Int) {
@@ -23,9 +22,7 @@ class Seat(row: Int, column: Int) {
             false -> binary(rights.drop(1), max = (max - min) / 2 + min, min = min)
             null -> min
         }
-
     }
-
 }
 
 fun main() {

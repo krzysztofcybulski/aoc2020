@@ -7,16 +7,14 @@ fun main() {
     var index = 0
     var length = 1
 
-    while(true) {
+    while (true) {
         val s = nums.subList(index, index + length).sum()
         when {
             s > sum -> {
                 index++
                 length = 1
             }
-            s < sum -> {
-                length++
-            }
+            s < sum -> length++
             else -> {
                 val res = nums.subList(index, index + length)
                 println((res.minOrNull() ?: 0) + (res.maxOrNull() ?: 0))

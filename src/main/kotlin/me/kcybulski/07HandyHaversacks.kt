@@ -2,10 +2,10 @@ package me.kcybulski
 
 data class Bag(val name: String, val innerBags: Collection<Pair<Int, Bag>>) {
 
-//    fun contains(color: String): Boolean = when(name) {
-//        color -> true
-//        else -> innerBags.any { (_, bag) -> bag.contains(color) }
-//    }
+    fun contains(color: String): Boolean = when(name) {
+        color -> true
+        else -> innerBags.any { (_, bag) -> bag.contains(color) }
+    }
 
     fun size(): Int = 1 + (innerBags.sumBy { (amount, bag) -> amount * bag.size() })
 
@@ -20,7 +20,7 @@ fun main() {
 }
 
 private fun createBag(name: String, bags: Map<String, List<Pair<Int, String>>>): Bag =
-    Bag(name, (bags[name] ?: emptyList<Pair<Int, String>>()).map { Pair(it.first, createBag(it.second, bags)) })
+    Bag(name, (bags[name] ?: emptyList()).map { Pair(it.first, createBag(it.second, bags)) })
 
 private val bagsRegex = "([1-9][0-9]*) ([a-z]+ [a-z]+) bags?[,|.]\\s*".toRegex()
 
