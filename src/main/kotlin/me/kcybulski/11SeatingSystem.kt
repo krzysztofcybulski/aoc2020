@@ -9,10 +9,19 @@ object TakenSeat : FerrySeat()
 
 data class Position(val row: Int, val column: Int)
 
-typealias Ferry = MutableMap<Position, FerrySeat>
+data class Ferry(
+    val seats: MutableMap<Position, FerrySeat>
+) {
+
+    val columns = seats.keys.maxByOrNull { it.column }?.column ?: 1
+    val rows = seats.keys.maxByOrNull { it.row }?.row ?: 1
+
+    fun taken() = seats.values.count { it is TakenSeat }
+
+}
 
 fun main() {
-    val seats: Ferry = mutableMapOf()
+    val seats: MutableMap<Position, FerrySeat> = mutableMapOf()
     val lines = lines("11SeatingSystem")
         .forEachIndexed { row, sr ->
             sr.forEachIndexed { column, s ->
@@ -21,20 +30,23 @@ fun main() {
                 }
             }
         }
-    val finalFerry = next(seats)
-    println(finalFerry.values.count { it is TakenSeat })
+    val ferry = Ferry(seats)
+    val finalFerry = next(ferry)
+    print(finalFerry)
+    println(finalFerry.taken())
 }
 
 fun next(ferry: Ferry): Ferry {
-    val newFerry: Ferry = mutableMapOf()
-    ferry.forEach { (pos, seat) ->
+    val newSeats: MutableMap<Position, FerrySeat> = mutableMapOf()
+    ferry.seats.forEach { (pos, seat) ->
         val occupied = getOccupiedNextTo(pos, ferry)
-        newFerry[pos] = when {
+        newSeats[pos] = when {
             occupied == 0 -> TakenSeat
-            occupied > 3 -> EmptySeat
+            occupied > 4 -> EmptySeat
             else -> seat
         }
     }
+    val newFerry = Ferry(newSeats)
     return if(newFerry == ferry) {
         newFerry
     } else {
@@ -43,28 +55,38 @@ fun next(ferry: Ferry): Ferry {
 }
 
 fun getOccupiedNextTo(position: Position, ferry: Ferry) =
-    isOccupied(position.copy(row = position.row - 1, column = position.column - 1), ferry) +
-            isOccupied(position.copy(row = position.row - 1), ferry) +
-            isOccupied(position.copy(row = position.row - 1, column = position.column + 1), ferry) +
-            isOccupied(position.copy(row = position.row, column = position.column - 1), ferry) +
-            isOccupied(position.copy(row = position.row, column = position.column + 1), ferry) +
-            isOccupied(position.copy(row = position.row + 1, column = position.column - 1), ferry) +
-            isOccupied(position.copy(row = position.row + 1), ferry) +
-            isOccupied(position.copy(row = position.row + 1, column = position.column + 1), ferry)
+    isOccupied(position, ferry) { it.copy(row = it.row - 1, column = it.column - 1) } +
+    isOccupied(position, ferry) { it.copy(row = it.row - 1) } +
+    isOccupied(position, ferry) { it.copy(row = it.row - 1, column = it.column + 1) } +
+    isOccupied(position, ferry) { it.copy(column = it.column - 1) } +
+    isOccupied(position, ferry) { it.copy(column = it.column + 1) } +
+    isOccupied(position, ferry) { it.copy(row = it.row + 1, column = it.column - 1) } +
+    isOccupied(position, ferry) { it.copy(row = it.row + 1) } +
+    isOccupied(position, ferry) { it.copy(row = it.row + 1, column = it.column + 1) }
 
-fun isOccupied(position: Position, ferry: Ferry): Int = if (ferry[position] is TakenSeat) 1 else 0
+fun isOccupied(pos: Position, ferry: Ferry, change: (Position) -> Position): Int {
+    val nextPos = change(pos)
+    if(nextPos.column < 0 || nextPos.row < 0 || nextPos.column > ferry.columns || nextPos.row > ferry.rows) {
+        return 0
+    }
+    if(ferry.seats[nextPos] is TakenSeat) {
+        return 1
+    }
+    if(ferry.seats[nextPos] is EmptySeat) {
+        return 0
+    }
+    return isOccupied(nextPos, ferry, change)
+}
 
 fun print(ferry: Ferry) {
-    val columns = ferry.keys.maxByOrNull { it.column }?.column ?: 1
-    val rows = ferry.keys.maxByOrNull { it.row }?.row ?: 1
-    (0..columns).forEach { column ->
-        (0..rows).forEach { row -> print(Position(row, column), ferry) }
+    (0..ferry.columns).forEach { column ->
+        (0..ferry.rows).forEach { row -> print(Position(row, column), ferry) }
         println()
     }
 }
 
 fun print(position: Position, ferry: Ferry) {
-    val seat = ferry[position]
+    val seat = ferry.seats[position]
     print(when(seat) {
         TakenSeat -> "#"
         EmptySeat -> "L"
