@@ -4,7 +4,7 @@ import me.kcybulski.utils.lines
 
 data class Difference(val jolts: Int)
 
-fun main(args: Array<String>) {
+fun main() {
     val lines = lines("10AdapterArray")
         .map { it.toInt() }
         .sorted()

@@ -57,7 +57,7 @@ fun kotlinFile(name: String) = """
     class ${name.substring(2)}() {
     }
 
-    fun main(args: Array<String>) {
+    fun main() {
         val lines = lines("$name")
         println(lines.size)
     }
