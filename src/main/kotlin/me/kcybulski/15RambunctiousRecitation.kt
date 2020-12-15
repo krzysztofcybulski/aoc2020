@@ -2,16 +2,26 @@ package me.kcybulski
 
 import me.kcybulski.utils.lines
 
-class RambunctiousRecitation() {
+class RambunctiousRecitation {
 
     fun say(numbers: List<Int>): Int {
-        val last = numbers.last()
-        val withoutLast = numbers.dropLast(1)
-        return when {
-            numbers.size == 2020 -> last
-            last !in withoutLast -> return say(numbers + 0)
-            else -> return say(numbers + (numbers.size - withoutLast.lastIndexOf(last) - 1))
+
+        val positions = mutableMapOf<Int, Int>()
+        numbers.dropLast(1).forEach { positions[it] = numbers.indexOf(it) }
+
+        var last = numbers.last()
+        var i = numbers.size
+
+        while(i != 30000000) {
+            val newLast = positions[last]
+                ?.let { i - it - 1 }
+                ?: 0
+            positions[last] = i - 1
+            last = newLast
+            i++
         }
+
+        return last
     }
 
 }
