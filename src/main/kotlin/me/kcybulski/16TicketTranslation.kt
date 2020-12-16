@@ -2,13 +2,37 @@ package me.kcybulski
 
 import me.kcybulski.utils.lines
 
-class TicketTranslation(
+data class TicketTranslation(
     private val rules: List<Rule>,
     private val ticket: Ticket,
     private val nearbyTickets: List<Ticket>
 ) {
 
-    fun getInvalid() = nearbyTickets.flatMap { it.getInvalid(rules) }
+    fun withoutInvalid() = copy(nearbyTickets = nearbyTickets.filterNot { it.isInvalid(rules) })
+
+    fun getInvalidMultiply() = nearbyTickets
+        .flatMap { it.getInvalidValues(rules) }
+        .reduce { a, b -> a + b }
+
+    fun ordered() = copy(rules = rules
+        .indices
+        .asSequence()
+        .map { index -> nearbyTickets.map { it.values[index] } }
+        .mapIndexed { index, list -> Column(rules.filter { rule -> list.all { rule.contains(it) } }, index) }
+        .sortedBy { it.rules.size }
+        .fold(emptyList<Column>()) { acc, newColumn -> acc + (newColumn.copy(rules = newColumn.rules - acc.flatMap { it.rules })) }
+        .sortedBy { it.index }
+        .toList()
+        .flatMap { it.rules }
+    )
+
+    fun getDeparture() = rules
+        .zip(ticket.values)
+        .filter { (rule, _) -> rule.name.startsWith("departure") }
+        .map { (_, ticketValue) -> ticketValue.toLong() }
+        .reduce { a, b -> a * b }
+
+    data class Column(val rules: List<Rule>, val index: Int)
 
     class Rule(val name: String, private val ranges: Set<Range>) {
         fun contains(n: Int) = ranges.any { it.contains(n) }
@@ -28,10 +52,11 @@ class TicketTranslation(
         fun contains(n: Int) = n in from..to
     }
 
-    class Ticket(private val values: List<Int>) {
+    class Ticket(val values: List<Int>) {
 
-        fun getInvalid(rules: List<Rule>) = values
-            .filter { v -> rules.all { !it.contains(v) } }
+        fun isInvalid(rules: List<Rule>) = values.any { v -> rules.none { it.contains(v) } }
+
+        fun getInvalidValues(rules: List<Rule>) = values.filter { v -> rules.none { it.contains(v) } }
 
         companion object {
 
@@ -52,5 +77,12 @@ fun main() {
     val nearbyTickets = lines.drop(rules.size + 3).map { TicketTranslation.Ticket.from(it) }
 
     val translation = TicketTranslation(rules, ticket, nearbyTickets)
-    println(translation.getInvalid().sum())
+
+    println(translation.getInvalidMultiply())
+
+    translation
+        .withoutInvalid()
+        .ordered()
+        .getDeparture()
+        .run { println(this) }
 }
