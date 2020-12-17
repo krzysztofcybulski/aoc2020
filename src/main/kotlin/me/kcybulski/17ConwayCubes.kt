@@ -18,16 +18,19 @@ class ConwayCubes(private val cubes: Set<Cube>) {
         .size
         .let { (cube in cubes && it in 2..3) || (cube !in cubes && it == 3) }
 
-    data class Cube(val x: Int, val y: Int, val z: Int) {
+    data class Cube(val x: Int, val y: Int, val z: Int, val w: Int) {
 
         fun neighbours(): Set<Cube> = (-1..1).flatMap { x ->
             (-1..1).flatMap { y ->
-                (-1..1).map { z ->
-                    Cube(
-                        x + this.x,
-                        y + this.y,
-                        z + this.z
-                    )
+                (-1..1).flatMap { z ->
+                    (-1..1).map { w ->
+                        Cube(
+                            x + this.x,
+                            y + this.y,
+                            z + this.z,
+                            w + this.w
+                        )
+                    }
                 }
             }
         }.toSet() - this
@@ -41,7 +44,7 @@ fun main() {
 
     val cubes = ConwayCubes(lines.flatMapIndexed { y, line ->
         line.mapIndexedNotNull { x, c ->
-            c.takeIf { it == '#' }?.let { ConwayCubes.Cube(x, y, 0) }
+            c.takeIf { it == '#' }?.let { ConwayCubes.Cube(x, y, 0, 0) }
         }
     }.toSet())
 
