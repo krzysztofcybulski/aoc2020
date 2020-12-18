@@ -1,52 +1,64 @@
 package me.kcybulski
 
 import me.kcybulski.utils.lines
-import java.lang.RuntimeException
+import java.lang.Character.isDigit
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class OperationOrder(val line: String) {
 
-    fun calculate(expresion: String = line): Long {
-        if (isSimple(expresion)) {
-            val splited = expresion
-                .split(" ")
-            return splited
-                .drop(1)
-                .windowed(2, 2)
-                .map { (op, n) -> op.first() to n.toLong() }
-                .fold(splited.first().toLong()) { acc, x -> if (x.first == '*') acc * x.second else acc + x.second }
-        } else {
-            val find = simpleOperation.find(expresion)!!.value
-            return calculate(expresion.replaceFirst(find, calculate(find.substring(1, find.length - 1)).toString()))
+    fun calculate(): Long {
+        val stack = Stack<Long>()
+        convertToRPN()
+            .forEach {
+                when (it) {
+                    "+" -> stack.push(stack.pop() + stack.pop())
+                    "*" -> stack.push(stack.pop() * stack.pop())
+                    else -> stack.push(it.toLong())
+                }
+            }
+        return stack.pop()
+    }
+
+    private fun convertToRPN(): ArrayList<String> {
+        val result = ArrayList<String>()
+        val opStack: Stack<String> = Stack()
+        line.split(" ").forEach { token ->
+            when {
+                isDigit(token.first()) -> result.add(token)
+                token == "(" -> opStack.push(token)
+                token == ")" -> {
+                    while (opStack.peek() != "(") {
+                        result.add(opStack.pop())
+                    }
+                    opStack.pop()
+                }
+                else -> {
+                    while (!opStack.isEmpty() && getPriority(opStack.peek()) >= getPriority(token)) {
+                        result.add(opStack.pop())
+                    }
+                    opStack.push(token)
+                }
+            }
         }
-    }
-
-    private fun isSimple(expresion: String): Boolean = '(' !in expresion
-
-    interface Calculable {
-        fun calculate(x: Int): Int
-    }
-
-    data class Expression(val operator: Char, val operations: List<Calculable>): Calculable {
-
-        override fun calculate(x: Int) = operations.fold(x) { acc, op -> op.calculate(acc) }
-    }
-
-    data class Operation(val operator: Char, val number: Int): Calculable {
-        override fun calculate(x: Int) = when(operator) {
-            '+' -> x + number
-            '*' -> x * number
-            else -> throw RuntimeException("No such operator")
+        while (!opStack.isEmpty()) {
+            result.add(opStack.pop())
         }
+        return result
     }
 
-    companion object {
-        val simpleOperation = "\\([0-9]+( [*+] [0-9]+)+\\)".toRegex()
+    private fun getPriority(op: String): Int = when (op) {
+        "(" -> 0
+        "+" -> 2
+        else -> 1
     }
 }
 
 fun main() {
     val lines = lines("18OperationOrder")
     lines
+        .map { it.replace("(", "( ").replace(")", " )") }
         .map { OperationOrder(it).calculate() }
         .onEach { println(it) }
         .sum()
