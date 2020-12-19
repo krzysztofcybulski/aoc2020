@@ -24,10 +24,16 @@ class Pattern(rules: List<String>) {
             "\"a\"" -> Rule.SimpleRule(index, "a")
             "\"b\"" -> Rule.SimpleRule(index, "b")
             else -> {
+                val rule = Rule.LoopRule(index, emptyList())
                 val orRules = content
                     .split(" | ")
-                    .map { or -> or.split(" ").map { it.toInt() }.map { rules[it] ?: add(it) } }
-                Rule.LoopRule(index, orRules)
+                    .map { or ->
+                        or.split(" ").map { it.toInt() }
+                            .map { if(it == index) rule else rules[it] ?: add(it) }
+                            .toMutableList()
+                    }
+                rule.rules = orRules
+                rule
             }
         }.also { rules[index] = it }
     }
@@ -36,24 +42,29 @@ class Pattern(rules: List<String>) {
         open val index: Int
     ) {
 
-        abstract fun asStringRegex(): String
+        abstract fun asStringRegex(l: Int = 0): String
 
         class SimpleRule(
             override val index: Int,
             val match: String
         ) : Rule(index) {
-            override fun asStringRegex() = match
+            override fun asStringRegex(l: Int) = match
         }
 
         class LoopRule(
             override val index: Int,
-            val rules: List<List<Rule>>
+            var rules: List<List<Rule>>
         ) : Rule(index) {
 
-            override fun asStringRegex() = rules
-                .joinToString("|", "(", ")") {
-                    it.joinToString("") { it.asStringRegex() }
-                }
+            override fun asStringRegex(l: Int): String {
+                return if (l > 100)
+                    ""
+                else
+                    rules
+                        .joinToString("|", "(", ")") {
+                            it.joinToString("") { it.asStringRegex(l + 1) }
+                        }
+            }
         }
     }
 
