@@ -17,9 +17,21 @@ class AllergenAssessment(val list: List<Food>) {
         return allergensToIngredients.toMap()
     }
 
-    private fun ingredientsAllergens(): Map<String, String> = allergensToIngredients
-        .flatMap { (allergen, ingredients) -> ingredients.map { it to allergen } }
-        .toMap()
+    private fun ingredientsAllergens(): Map<String, String> {
+        val possible = allergensToIngredients
+            .flatMap { (allergen, ingredients) -> ingredients.map { it to allergen } }
+            .groupBy { it.first }
+            .mapValues { (_, v) -> v.map { it.second }.toMutableList() }
+        while (possible.filter { it.value.size > 1 }.isNotEmpty()) {
+            possible
+                .filter { it.value.size == 1 }
+                .forEach { (ing, all) ->
+                    possible.filter { it.value.contains(all[0]) && it.key != ing }
+                        .forEach { (a, b) -> b.remove(all[0]) }
+                }
+        }
+        return possible.mapValues { (k, v) -> v[0] }
+    }
 
     class Food(
         val ingredients: Set<String>,
@@ -31,12 +43,13 @@ class AllergenAssessment(val list: List<Food>) {
 fun main() {
     val lines = lines("21AllergenAssessment")
         .map { parse(it) }
-    val allergenAssessment = AllergenAssessment(lines)
-    allergenAssessment
-        .list
-        .flatMap { it.ingredients }
-        .filter { it !in allergenAssessment.ingredientsAllergens.keys }
-        .run { println(size) }
+
+    AllergenAssessment(lines)
+        .ingredientsAllergens
+        .toList()
+        .sortedBy { it.second }
+        .joinToString(",") { it.first }
+        .run { println(this) }
 }
 
 private fun parse(line: String): AllergenAssessment.Food {
