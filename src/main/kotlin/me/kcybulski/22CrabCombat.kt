@@ -1,44 +1,67 @@
 package me.kcybulski
 
 import me.kcybulski.utils.lines
+import java.lang.RuntimeException
 import java.util.*
 
 class CrabCombat(val player1: Deck, val player2: Deck) {
 
-    fun play(): Long {
-        if(!player1.hasCards()) {
-            return player2.points()
+    val games = mutableSetOf<Pair<String, String>>()
+
+    fun play(): Deck {
+        if (games.contains(player1.toString() to player2.toString())) {
+            return player1
         }
-        if(!player2.hasCards()) {
-            return player1.points()
-        }
-        val card1 = player1.get()
-        val card2 = player2.get()
-        if(card1 > card2) {
-            player1.add(card1, card2)
-            println("Player 1 won")
-        } else if(card2 > card1) {
-            player2.add(card2, card1)
-            println("Player 2 won")
+        games.add(player1.toString() to player2.toString())
+
+        return if(!player1.hasCards()) {
+            player2
+        } else if(!player2.hasCards()) {
+            player1
         } else {
-            println("A tie")
+            val round = playRound()
+            play()
         }
-        return play()
     }
 
-    class Deck(starting: List<Int>) {
+    fun playRound(): Deck {
+        val card1 = player1.get()
+        val card2 = player2.get()
 
-        private val cards: Queue<Int> = LinkedList<Int>(starting)
+        if(player1.cardsLeft() >= card1 && player2.cardsLeft() >= card2) {
+            val p1 = Deck(LinkedList(player1.cards.take(card1)))
+            val p2 = Deck(LinkedList(player2.cards.take(card2)))
+            return when(CrabCombat(p1, p2).play()) {
+                p1 -> player1.also { it.add(card1, card2) }
+                p2 -> player2.also { it.add(card2, card1) }
+                else -> throw RuntimeException("No such player")
+            }
+        }
+
+        return when {
+            card1 > card2 -> player1.also { it.add(card1, card2) }
+            card2 > card1 -> player2.also { it.add(card2, card1) }
+            else -> throw RuntimeException("Draw")
+        }
+    }
+
+    data class Deck(val cards: Queue<Int>) {
 
         fun hasCards(): Boolean = cards.isNotEmpty()
         fun get(): Int = cards.poll()
         fun add(vararg cards: Int) {
-            cards.forEach { this.cards.add(it) }
+            cards.forEach { this.cards.offer(it) }
         }
+        fun cardsLeft() = cards.size
+
         fun points(): Long = cards.reversed()
             .zip(1..cards.size)
             .map { it.first * it.second.toLong() }
             .sum()
+
+        override fun hashCode() = cards.toIntArray().hashCode()
+
+        override fun toString() = cards.joinToString(",")
 
     }
 
@@ -50,6 +73,6 @@ fun main() {
     val player1 = lines.drop(1).takeWhile { it != "Player 2:" }.map { it.toInt() }
     val player2 = lines.drop(2).drop(player1.size).map { it.toInt() }
 
-    val game = CrabCombat(CrabCombat.Deck(player1), CrabCombat.Deck(player2))
-    println(game.play())
+    val game = CrabCombat(CrabCombat.Deck(LinkedList(player1)), CrabCombat.Deck(LinkedList(player2)))
+    println(game.play().points())
 }
